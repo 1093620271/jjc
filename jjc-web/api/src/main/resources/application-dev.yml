@@ -1,0 +1,126 @@
+################### 自定义配置  ###################
+# 日志配置  为空为项目跟目录下的logs  或者指定已经存在的目录，直接发布到jar发布的路径下，为了兼容linux跟window系统
+log:
+  path: D://jjc/jjc-logs/jjc-api
+common: #公用配置，基本所有配置可配在这个里面，获取配置详情看CommonConfig类
+  #本地文件的上传路径，目前写的是相对路径，相对于jar包发布的路径下，为了兼容linux跟window系统
+  uploadPath: D:/jjc/jjc-file
+  #本地文件的映射http路径，目前写的是相对路径，相对于项目根目录
+  uploadHttpPath: http://localhost:8020/uploadfile
+#  uploadHttpPath: http://192.168.1.170:8030/uploadfile
+  #是否同步文件到ftp ，true或者false,false即上传到本地
+#  syncFileToFtp: false
+  syncFileToFtp: false
+  #ftp地址,格式：IP|端口|账号|密码|根目录(可为空) ，syncFileToFtp为true才用到
+  ftpPath: 192.168.1.126|25|rd|rd.123|qygk
+#  ftpPath: 192.168.1.170|21|administrator|ljsasd694651866|uploadfile
+  #ftp地址的映射http地址，syncFileToFtp为true才用到
+  ftpHttpPath: http://192.168.1.126:8020/qygk
+  #缓存类型，默认是redis。其次是ehcache
+  cacheType: ehcache
+
+
+jdbc: #数据库配置
+    type: mysql
+    driver: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/jjc_db?useUnicode=true&characterEncoding=utf-8&&allowMultiQueries=true
+#    url: jdbc:mysql://127.0.0.1:3306/areamc?useUnicode=true&characterEncoding=utf-8&&allowMultiQueries=true
+    username: root
+    password: root
+###################  项目启动端口  ###################
+server:
+  port: 8080
+  servlet:
+    context-path: /   #设置根目录
+###################  spring配置  ###################
+spring:
+    application:
+      name: jjc-web #应用名称，用于向eureka服务注册时候的用
+    redis:
+      database: 1
+      host: 127.0.0.1  # Redis服务器地址
+      port: 6379   # Redis服务器连接端口
+      password: root
+      timeout: 5000 #连接超时时间（毫秒）
+      jedis:
+        pool:
+          max-active: 20 # 连接池最大连接数（使用负值表示没有限制）
+          max-wait: -1 # 连接池中的最小空闲连接
+          max-idle: 500 # 连接池中的最大空闲连接
+          min-idle: 0 #连接池中的最小空闲连接
+    servlet:
+      multipart:
+        max-file-size: 150MB  #上传最大支持文件大小
+        max-request-size: 150MB #上传最大支持请求大小
+    http:
+      encoding:
+        force:  true
+        charset: utf-8
+#    mvc:
+#      static-path-pattern: /static/**
+    datasource: # 配置数据库
+        url: ${jdbc.url}
+        username: ${jdbc.username}
+        password: ${jdbc.password}
+        driver-class-name: ${jdbc.driver}
+        # 使用druid数据源
+        type: com.alibaba.druid.pool.DruidDataSource
+        druid:
+          filters: stat
+          maxActive: 100
+          initialSize: 1
+          maxWait: 60000
+          minIdle: 3
+          timeBetweenEvictionRunsMillis: 60000
+          minEvictableIdleTimeMillis: 300000
+          validationQuery: select 'x'
+          testWhileIdle: true
+          testOnBorrow: false
+          testOnReturn: false
+          poolPreparedStatements: true
+          maxOpenPreparedStatements: 20
+    freemarker:
+        template-loader-path: classpath:/templates # 设定ftl文件路径
+        cache: false  #关闭缓存，及时刷新，上线生产环境需要修改为true
+        charset: utf-8
+        check-template-location: true
+        content-type: text/html
+        suffix: .ftl
+        expose-request-attributes: true
+        expose-session-attributes: true
+        request-context-attribute: request #意思是把Spring的RequestContext对象暴露为变量request
+
+###################  mybatis配置,该配置节点为独立的节点，有很多将这个配置放在spring的节点下，导致配置无法被识别  ###################
+mybatis:
+  mapper-locations: classpath*:sqlmap/*/**/*Mapper.xml  #注意：classpath后面带*, 一定要对应mapper映射xml文件的所在路径
+  type-aliases-package: com.jjc.api.model  # 自动扫描domain目录体包,映射文件可以直接用简单类名 ,省掉Configuration.xml里的手工配置
+  configuration:
+    map-underscore-to-camel-case: true #设置启用数据库字段下划线映射到java对象的驼峰式命名属性，默认为false
+    call-setters-on-nulls: true
+
+########## mapper公用接口路径
+mapper:
+  mappers: com.jjc.api.baseDao.IBaseDao
+  identity: MYSQL
+
+################### pagehelper分页配置  ###################
+pagehelper:
+    reasonable: false
+    offset-as-page-num: true
+    row-bounds-with-count: true
+#    helper-dialect: sqlserver
+    auto-dialect: true
+    auto-runtime-dialect: true
+
+####################  定时任务配置信息 PS:当值为空时，任务不执行 ###################
+
+
+swagger:
+  enable: true
+
+mqtt:
+  username: admin  #MQTT-用户名
+  password: admin  #MQTT-密码
+  hostUrl: tcp://127.0.0.1:61613 #MQTT-服务器连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613，tcp://192.168.2.133:61613
+  clientId: mqttId  #MQTT-连接服务器默认客户端ID
+  defaultTopic: mqttdefault

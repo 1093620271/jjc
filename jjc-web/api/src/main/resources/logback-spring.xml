@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+说明：
+    1. 文件的命名和加载顺序有关
+       logback.xml早于application.yml加载，logback-spring.xml晚于application.yml加载
+       如果logback配置需要使用application.yml中的属性，需要命名为logback-spring.xml
+    2. logback使用application.yml中的属性
+       使用springProperty才可使用application.yml中的值 可以设置默认值
+-->
+<configuration>
+    <!-- log base path -->
+    <springProperty scope="context" name="logPath" source="log.path" defaultValue="logs"/>
+    <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+    <property name="LOG_HOME" value="${logPath}" />
+    <!-- 控制台输出 -->   
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+       <!-- 日志输出编码 -->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+             <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId}] %-5level  %logger{50} - %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <!-- 按照每天生成日志文件 -->
+    <appender name="ErrorFILE"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--<Encoding>UTF-8</Encoding>-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--日志文件输出的文件名，使用绝对路径-->
+            <FileNamePattern>${LOG_HOME}/error/%d{yyyyMMdd}%i.Error.log</FileNamePattern>
+            <!--日志文件输出的文件名，在tomcat下-->
+            <!--<FileNamePattern>${catalina.base}/logs/abdoor/error.log.%d{yyyy-MM-dd}.log</FileNamePattern>-->
+            <!-- each file should be at most 100MB, keep 60 days worth of history, but at most 20GB -->
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <!--<layout class="ch.qos.logback.classic.PatternLayout">-->
+        <!--&lt;!&ndash;格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符&ndash;&gt;-->
+        <!--<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level  %logger{50} - %msg%n</pattern>-->
+        <!--</layout>-->
+        <encoder>
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId}] %-5level  %logger{50} - %msg%n%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <!-- 过滤链 只记录ERROR级别 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 按照每天生成日志文件 -->
+    <appender name="InfoFILE"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--<Encoding>UTF-8</Encoding>-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--日志文件输出的文件名，使用绝对路径-->
+            <FileNamePattern>${LOG_HOME}/info/%d{yyyyMMdd}%i.Info.log</FileNamePattern>
+            <!--日志文件输出的文件名，在tomcat下-->
+            <!--<FileNamePattern>${catalina.base}/logs/abdoor/info.log.%d{yyyy-MM-dd}.log</FileNamePattern>-->
+            <!-- each file should be at most 100MB, keep 60 days worth of history, but at most 20GB -->
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <!--<layout class="ch.qos.logback.classic.PatternLayout">-->
+        <!--&lt;!&ndash;格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符&ndash;&gt;-->
+        <!--<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level  %logger{50} - %msg%n</pattern>-->
+        <!--</layout>-->
+        <encoder>
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId}] %-5level  %logger{50} - %msg%n%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <!-- 过滤链 只记录INFO级别 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!--日志异步到数据库 -->
+    <!--<appender name="DB" class="ch.qos.logback.classic.db.DBAppender">-->
+        <!--<connectionSource class="ch.qos.logback.core.db.DataSourceConnectionSource">-->
+            <!--<dataSource class="org.apache.commons.dbcp.BasicDataSource">-->
+                <!--<driverClassName>com.mysql.jdbc.Driver</driverClassName>-->
+                <!--<url>jdbc:mysql://127.0.0.1:3306/cczhyy_log?useUnicode=true&amp;allowMultiQueries=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;useSSL=false</url>-->
+                <!--<username>root</username>-->
+                <!--<password>123456</password>-->
+            <!--</dataSource>-->
+        <!--</connectionSource>-->
+        <!--<filter class="ch.qos.logback.classic.filter.LevelFilter">-->
+            <!--<level>INFO</level>-->
+            <!--<onMatch>ACCEPT</onMatch>-->
+            <!--<onMismatch>DENY</onMismatch>-->
+        <!--</filter>-->
+    <!--</appender>-->
+
+    <!-- 日志输出级别 -->
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />   
+        <appender-ref ref="ErrorFILE" />
+        <appender-ref ref="InfoFILE" />
+        <!--<appender-ref ref="DB" />-->
+    </root>
+
+    <logger name="org.apache.shiro" level="INFO"/>
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.apache.ibatis" level="INFO"/>
+    <logger name="freemarker.cache" level="INFO"/>
+    <logger name="org.mybatis.spring" level="INFO"/>
+    <logger name="org.quartz.core.QuartzSchedulerThread" level="INFO"/>
+
+    <logger name="com.mangofactory.swagger" level="ERROR"/>
+    <logger name="org.hibernate" level="ERROR"/>
+    <logger name="com.alibaba.druid" level="ERROR"/>
+    <logger name="io.lettuce.core" level="ERROR"/>
+    <!--<logger name="com.netflix.discovery" level="ERROR"/>-->
+    
+</configuration>
